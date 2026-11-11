@@ -6,8 +6,8 @@ as port scans and brute-force attempts in a readable report.
 
 **Status:** early work in progress. It can read a pcap and group packets into
 flows, and has four rule-based detections (port scan, brute force, outbound
-volume, suspicious DNS) and a Markdown report renderer. There is no
-command-line interface yet.
+volume, suspicious DNS), a Markdown report and a command-line interface.
+Full documentation comes in a later step.
 
 ## Setup
 
@@ -18,6 +18,14 @@ python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest
+```
+
+## Usage
+
+```bash
+python -m analyzer analyze capture.pcap --report out.md
+python -m analyzer analyze capture.pcap --min-severity medium   # print to stdout
+python -m analyzer analyze --help                                # all threshold flags
 ```
 
 ## Project layout
