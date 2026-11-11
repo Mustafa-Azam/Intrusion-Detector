@@ -4,8 +4,8 @@ An offline network traffic analyzer for saved packet captures (pcap files). It
 reads a capture, groups packets into flows, and will flag suspicious patterns such
 as port scans and brute-force attempts in a readable report.
 
-**Status:** early work in progress. Only the project skeleton exists so far; no
-detections are implemented yet.
+**Status:** early work in progress. It can read a pcap and group packets into
+flows; no detections are implemented yet.
 
 ## Setup
 
