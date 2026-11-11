@@ -89,5 +89,8 @@ clock, so tests can compare exact output.
 - `tests/test_demo_capture.py` checks that the demo capture still produces the
   alerts shown in the README's sample report.
 
+- GitHub Actions runs all of this on Python 3.11, 3.12 and 3.13 for every push
+  and pull request, then runs the CLI on the demo capture as a smoke test.
+
 What is not tested: real-world captures, very large files, captures truncated
 mid-file, and IPv6 extension headers.

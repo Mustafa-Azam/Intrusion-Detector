@@ -1,5 +1,7 @@
 # Intrusion Detector
 
+[![tests](https://github.com/Mustafa-Azam/Intrusion-Detector/actions/workflows/tests.yml/badge.svg)](https://github.com/Mustafa-Azam/Intrusion-Detector/actions/workflows/tests.yml)
+
 An offline network traffic analyzer for saved packet captures (pcap/pcapng).
 It reads a capture, groups packets into flows, runs four rule-based detections
 and writes a Markdown report with the alerts sorted by severity.
@@ -33,6 +35,9 @@ source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 pytest                           # run the tests
 ```
+
+GitHub Actions runs the tests on Python 3.11, 3.12 and 3.13 on every push and
+pull request (`.github/workflows/tests.yml`).
 
 Try it on the synthetic demo capture:
 
