@@ -59,8 +59,8 @@ CLI flags can override them. CLI defaults are read from the `Config` classes
 so the help text can't drift from the real values.
 
 **One alert per source (or source/target pair), not per packet.** Each alert
-reports the busiest window as evidence. This keeps a 65,000-port scan to one
-line in the report.
+reports the busiest window as evidence. A full 65,535-port scan of one host
+is one alert, not 65,535.
 
 **Port-scan "probes" are flows of 3 packets or fewer.** Without this filter a
 browser opening HTTPS connections to many sites looked like a horizontal scan.
