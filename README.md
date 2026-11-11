@@ -6,7 +6,8 @@ as port scans and brute-force attempts in a readable report.
 
 **Status:** early work in progress. It can read a pcap and group packets into
 flows, and has four rule-based detections (port scan, brute force, outbound
-volume, suspicious DNS). There is no report or command-line interface yet.
+volume, suspicious DNS) and a Markdown report renderer. There is no
+command-line interface yet.
 
 ## Setup
 
