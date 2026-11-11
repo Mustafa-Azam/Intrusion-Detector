@@ -14,6 +14,7 @@ from pathlib import Path
 from scapy.layers.dns import DNS
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.inet6 import IPv6
+from scapy.error import Scapy_Exception
 from scapy.packet import Packet
 from scapy.utils import PcapReader
 
@@ -22,6 +23,10 @@ from scapy.utils import PcapReader
 PROTOCOL_NAMES = {1: "ICMP", 6: "TCP", 17: "UDP", 58: "ICMPv6"}
 
 IPV6_HEADER_BYTES = 40
+
+
+class CaptureReadError(Exception):
+    """The file exists but is not a capture Scapy can read (pcap or pcapng)."""
 
 
 @dataclass(frozen=True)
@@ -43,11 +48,22 @@ def read_packets(path: str | Path) -> Iterator[PacketRecord]:
     Non-IP frames (ARP, for example) are skipped. PcapReader streams the file
     one packet at a time, so large captures don't have to fit in memory.
     """
-    with PcapReader(str(path)) as reader:
+    with _open_capture(path) as reader:
         for packet in reader:
             record = to_record(packet)
             if record is not None:
                 yield record
+
+
+def _open_capture(path: str | Path) -> PcapReader:
+    """Open a pcap or pcapng file, turning Scapy's generic error into ours.
+
+    A missing file still raises FileNotFoundError, which is already clear.
+    """
+    try:
+        return PcapReader(str(path))
+    except Scapy_Exception as error:
+        raise CaptureReadError(f"{path}: {error}") from error
 
 
 def to_record(packet: Packet) -> PacketRecord | None:
@@ -119,7 +135,7 @@ def read_dns(path: str | Path) -> Iterator[DnsRecord]:
     This is a second pass over the file. Reading twice is simpler than mixing
     DNS fields into PacketRecord, and speed is not a concern for offline use.
     """
-    with PcapReader(str(path)) as reader:
+    with _open_capture(path) as reader:
         for packet in reader:
             record = to_dns_record(packet)
             if record is not None:
