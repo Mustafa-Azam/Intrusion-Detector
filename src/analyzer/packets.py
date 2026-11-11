@@ -11,6 +11,7 @@ from collections.abc import Iterator
 from dataclasses import dataclass
 from pathlib import Path
 
+from scapy.layers.dns import DNS
 from scapy.layers.inet import IP, TCP, UDP
 from scapy.layers.inet6 import IPv6
 from scapy.packet import Packet
@@ -98,3 +99,50 @@ def _ip_size(ip: Packet) -> int:
     if isinstance(ip, IP):
         return ip.len
     return IPV6_HEADER_BYTES + ip.plen
+
+
+@dataclass(frozen=True)
+class DnsRecord:
+    """One DNS query or response, with only the fields the DNS rules use."""
+
+    timestamp: float
+    src_ip: str
+    dst_ip: str
+    query_name: str  # without the trailing dot, e.g. "example.com"
+    is_response: bool
+    rcode: int  # 0 = NOERROR, 3 = NXDOMAIN (only meaningful for responses)
+
+
+def read_dns(path: str | Path) -> Iterator[DnsRecord]:
+    """Yield a DnsRecord for each DNS message (over UDP or TCP) with a question.
+
+    This is a second pass over the file. Reading twice is simpler than mixing
+    DNS fields into PacketRecord, and speed is not a concern for offline use.
+    """
+    with PcapReader(str(path)) as reader:
+        for packet in reader:
+            record = to_dns_record(packet)
+            if record is not None:
+                yield record
+
+
+def to_dns_record(packet: Packet) -> DnsRecord | None:
+    ip = _ip_layer(packet)
+    if ip is None or DNS not in packet:
+        return None
+    dns = packet[DNS]
+    if not dns.qd:
+        return None
+    return DnsRecord(
+        timestamp=float(packet.time),
+        src_ip=ip.src,
+        dst_ip=ip.dst,
+        query_name=_decode_name(dns.qd[0].qname),
+        is_response=bool(dns.qr),
+        rcode=dns.rcode,
+    )
+
+
+def _decode_name(raw: bytes) -> str:
+    # errors="replace" so a malformed name can't crash the whole analysis.
+    return raw.decode("ascii", errors="replace").rstrip(".")

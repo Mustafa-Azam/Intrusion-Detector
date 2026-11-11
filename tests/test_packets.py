@@ -67,3 +67,30 @@ def test_skips_non_ip_frames(tmp_path):
     wrpcap(str(path), [Ether() / ARP(psrc="10.0.0.1", pdst="10.0.0.2")])
 
     assert list(read_packets(path)) == []
+
+
+def test_reads_dns_query_and_nxdomain_response(write_pcap):
+    from scapy.layers.dns import DNS, DNSQR
+
+    from analyzer.packets import read_dns
+
+    query = DNS(id=1, qd=DNSQR(qname="nope.example.com"))
+    answer = DNS(id=1, qr=1, rcode=3, qd=DNSQR(qname="nope.example.com"))
+    path = write_pcap([
+        (1.0, IP(src="10.0.0.5", dst="10.0.0.53") / UDP(sport=5000, dport=53) / query),
+        (1.1, IP(src="10.0.0.53", dst="10.0.0.5") / UDP(sport=53, dport=5000) / answer),
+    ])
+
+    sent, received = list(read_dns(path))
+
+    assert (sent.query_name, sent.is_response) == ("nope.example.com", False)
+    assert (received.is_response, received.rcode) == (True, 3)
+    assert received.dst_ip == "10.0.0.5"
+
+
+def test_read_dns_ignores_non_dns_packets(write_pcap):
+    from analyzer.packets import read_dns
+
+    path = write_pcap([(1.0, IP(src="10.0.0.1", dst="10.0.0.2") / TCP(sport=1, dport=80))])
+
+    assert list(read_dns(path)) == []
