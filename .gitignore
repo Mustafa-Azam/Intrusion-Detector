@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# Virtual environments
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Packet captures: keep real captures out of git (size, privacy).
+# Tiny generated test fixtures live under tests/ and are allowed.
+*.pcap
+*.pcapng
+!tests/**/*.pcap
+
+# Generated reports
+reports/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
