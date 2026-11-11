@@ -5,7 +5,8 @@ reads a capture, groups packets into flows, and will flag suspicious patterns su
 as port scans and brute-force attempts in a readable report.
 
 **Status:** early work in progress. It can read a pcap and group packets into
-flows; no detections are implemented yet.
+flows, and has four rule-based detections (port scan, brute force, outbound
+volume, suspicious DNS). There is no report or command-line interface yet.
 
 ## Setup
 
